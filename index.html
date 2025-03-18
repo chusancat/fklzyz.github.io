@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FKLZYZ</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+            position: relative;
+            max-width: 100%;
+        }
+
+        #preview {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            display: none;
+        }
+
+        .watermark {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 42px;
+            text-shadow: 2px 2px 4px black;
+            pointer-events: none;
+            text-align: left;
+            max-width: 70%;
+        }
+
+        .overlay-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .overlay-image {
+            width: 50%;
+            height: auto;
+            opacity: 0.8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .section {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .download-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-group-inline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group-inline label {
+            margin-bottom: 0;
+        }
+
+        .form-group-inline input {
+            width: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>图片叠加与水印工具</h1>
+
+        <div class="section">
+            <h2>上传图片</h2>
+            <div class="form-group">
+                <label for="mainImage">选择背景图片：</label>
+                <input type="file" id="mainImage" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label for="overlayImage">选择中心叠加图片：</label>
+                <input type="file" id="overlayImage" accept="image/*">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>水印设置</h2>
+            <div class="form-group">
+                <label for="longitudeTitle">经度标题：</label>
+                <input type="text" id="longitudeTitle" value="经度：" placeholder="例如：经度：">
+            </div>
+
+            <div class="form-group">
+                <label for="longitudeValue">经度值：</label>
+                <input type="text" id="longitudeValue" placeholder="例如：116.3912757">
+            </div>
+
+            <div class="form-group">
+                <label for="latitudeTitle">纬度标题：</label>
+                <input type="text" id="latitudeTitle" value="纬度：" placeholder="例如：纬度：">
+            </div>
+
+            <div class="form-group">
+                <label for="latitudeValue">纬度值：</label>
+                <input type="text" id="latitudeValue" placeholder="例如：39.9057329">
+            </div>
+
+            <div class="form-group">
+                <label for="coordinateTitle">坐标标题：</label>
+                <input type="text" id="coordinateTitle" value="坐标：" placeholder="例如：坐标：">
+            </div>
+
+            <div class="form-group">
+                <label for="coordinateValue">坐标值：</label>
+                <input type="text" id="coordinateValue" placeholder="例如：X:123 Y:456">
+            </div>
+
+            <div class="form-group">
+                <label for="addressTitle">地址标题：</label>
+                <input type="text" id="addressTitle" value="地址：" placeholder="例如：地址：">
+            </div>
+
+            <div class="form-group">
+                <label for="addressValue">地址值：</label>
+                <input type="text" id="addressValue" placeholder="例如：北京市海淀区中关村">
+            </div>
+
+            <div class="form-group">
+                <label for="timeTitle">时间标题：</label>
+                <input type="text" id="timeTitle" value="时间：" placeholder="例如：时间：">
+            </div>
+
+            <div class="form-group">
+                <label for="timeValue">时间值：</label>
+                <input type="text" id="timeValue" placeholder="例如：2025-03-18 14:30:00">
+                <button id="currentTime" type="button" style="margin-top: 5px; width: auto;">使用当前时间</button>
+            </div>
+
+            <div class="form-group">
+                <label for="watermarkColor">水印颜色：</label>
+                <input type="color" id="watermarkColor" value="#ffffff" style="width: auto;">
+            </div>
+
+            <div class="form-group">
+                <label for="watermarkMargin">水印边距（像素）：</label>
+                <input type="number" id="watermarkMargin" value="15" min="0" max="100" step="1" style="width: 100px;">
+            </div>
+
+            <div class="form-group">
+                <label for="watermarkFontSize">水印字体大小（像素）：</label>
+                <input type="number" id="watermarkFontSize" value="42" min="12" max="100" step="1"
+                    style="width: 100px;">
+            </div>
+        </div>
+
+        <button id="generateBtn" type="button">生成预览</button>
+
+        <div class="preview-container">
+            <canvas id="canvas" class="hidden"></canvas>
+            <img id="preview" alt="预览">
+            <div id="watermark" class="watermark hidden"></div>
+        </div>
+
+        <div class="download-section hidden" id="downloadSection">
+            <button id="downloadBtn" type="button">下载图片</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mainImageInput = document.getElementById('mainImage');
+            const overlayImageInput = document.getElementById('overlayImage');
+            const generateBtn = document.getElementById('generateBtn');
+            const preview = document.getElementById('preview');
+            const canvas = document.getElementById('canvas');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadSection = document.getElementById('downloadSection');
+            const currentTimeBtn = document.getElementById('currentTime');
+            const watermarkColorPicker = document.getElementById('watermarkColor');
+            const watermarkMarginInput = document.getElementById('watermarkMargin');
+            const watermarkFontSizeInput = document.getElementById('watermarkFontSize');
+
+            let mainImg = null;
+            let overlayImg = null;
+
+            // 填充当前时间
+            currentTimeBtn.addEventListener('click', function () {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+
+                document.getElementById('timeValue').value =
+                    `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            });
+
+            // 加载主图片
+            mainImageInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        mainImg = new Image();
+                        mainImg.onload = function () {
+                            checkImagesLoaded();
+                        };
+                        mainImg.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // 加载叠加图片
+            overlayImageInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        overlayImg = new Image();
+                        overlayImg.onload = function () {
+                            checkImagesLoaded();
+                        };
+                        overlayImg.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // 检查图片是否都已加载
+            function checkImagesLoaded() {
+                if (mainImg && overlayImg) {
+                    generateBtn.disabled = false;
+                }
+            }
+
+            // 生成预览
+            generateBtn.addEventListener('click', function () {
+                if (!mainImg || !overlayImg) {
+                    alert('请先上传背景图片和叠加图片');
+                    return;
+                }
+
+                // 设置画布大小与主图片一致
+                canvas.width = mainImg.width;
+                canvas.height = mainImg.height;
+
+                const ctx = canvas.getContext('2d');
+
+                // 绘制主图片
+                ctx.drawImage(mainImg, 0, 0, canvas.width, canvas.height);
+
+                // 计算叠加图片的尺寸和位置（宽度为主图的一半）
+                const overlayWidth = canvas.width * 0.6;
+                const overlayHeight = (overlayImg.height / overlayImg.width) * overlayWidth;
+                const overlayX = (canvas.width - overlayWidth) / 2;
+                const overlayY = (canvas.height - overlayHeight) / 2;
+
+                // 绘制叠加图片
+                ctx.drawImage(overlayImg, overlayX, overlayY, overlayWidth, overlayHeight);
+
+                // 添加水印文本
+                const longitudeTitle = document.getElementById('longitudeTitle').value;
+                const longitudeValue = document.getElementById('longitudeValue').value;
+                const latitudeTitle = document.getElementById('latitudeTitle').value;
+                const latitudeValue = document.getElementById('latitudeValue').value;
+                const coordinateTitle = document.getElementById('coordinateTitle').value;
+                const coordinateValue = document.getElementById('coordinateValue').value;
+                const addressTitle = document.getElementById('addressTitle').value;
+                const addressValue = document.getElementById('addressValue').value;
+                const timeTitle = document.getElementById('timeTitle').value;
+                const timeValue = document.getElementById('timeValue').value;
+                const watermarkColor = document.getElementById('watermarkColor').value;
+
+                // 获取水印边距和字体大小
+                const margin = parseInt(watermarkMarginInput.value);
+                const fontSize = parseInt(watermarkFontSizeInput.value);
+
+                // 设置水印样式
+                ctx.font = `${fontSize}px Arial`;
+                ctx.fillStyle = watermarkColor;
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1.5;
+                ctx.textBaseline = 'top';
+
+                // 计算行高
+                const lineHeight = Math.floor(fontSize * 1.6);
+
+                // 绘制水印文本（文字轮廓效果）
+                function drawTextWithShadow(text, x, y) {
+                    // ctx.shadowColor = 'black';
+                    // ctx.shadowBlur = 4;
+                    // ctx.shadowOffsetX = 2;
+                    // ctx.shadowOffsetY = 2;
+                    ctx.fillText(text, x, y);
+                    // ctx.shadowColor = 'transparent';
+                }
+
+                // 计算水印文本的总高度
+                const totalTextHeight = lineHeight * 5;
+
+                // 计算起始位置，确保下边距与左边距相同
+                const startY = canvas.height - totalTextHeight - margin + 40;
+                const startX = margin;
+
+                // 绘制水印文本
+                drawTextWithShadow(`${longitudeTitle}${longitudeValue}`, startX, startY);
+                drawTextWithShadow(`${latitudeTitle}${latitudeValue}`, startX, startY + lineHeight);
+                drawTextWithShadow(`${coordinateTitle}${coordinateValue}`, startX, startY + lineHeight * 2);
+                drawTextWithShadow(`${addressTitle}${addressValue}`, startX, startY + lineHeight * 3);
+                drawTextWithShadow(`${timeTitle}${timeValue}`, startX, startY + lineHeight * 4);
+
+                // 显示预览
+                preview.src = canvas.toDataURL('image/jpeg');
+                preview.style.display = 'block';
+                downloadSection.classList.remove('hidden');
+            });
+
+            // 下载图片
+            downloadBtn.addEventListener('click', function () {
+                const link = document.createElement('a');
+                link.download = '处理后的图片.jpg';
+                link.href = canvas.toDataURL('image/jpeg');
+                link.click();
+            });
+        });
+    </script>
+</body>
+
+</html>
