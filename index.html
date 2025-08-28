@@ -37,7 +37,8 @@
         }
 
         input,
-        textarea {
+        textarea,
+        select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -102,10 +103,6 @@
             opacity: 0.8;
         }
 
-        .hidden {
-            display: none;
-        }
-
         .section {
             border-bottom: 1px solid #eee;
             padding-bottom: 15px;
@@ -130,6 +127,173 @@
         .form-group-inline input {
             width: auto;
         }
+
+        .overlay-preview {
+            max-width: 100px;
+            max-height: 100px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .coordinate-manager {
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .coordinate-form {
+            display: grid;
+            grid-template-columns: 2fr auto auto auto;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 15px;
+        }
+
+        .coordinate-display {
+            background-color: #f0f8ff;
+            border: 1px solid #e3f2fd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .location-btn {
+            background-color: #FF9800;
+            margin-right: 10px;
+        }
+
+        .location-btn:hover {
+            background-color: #F57C00;
+        }
+
+        .location-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status-success {
+            color: #4CAF50;
+        }
+
+        .status-error {
+            color: #f44336;
+        }
+
+        .status-warning {
+            color: #FF9800;
+        }
+
+        .coordinate-form input {
+            padding: 6px 8px;
+            font-size: 14px;
+        }
+
+        .coordinate-form button {
+            padding: 6px 12px;
+            font-size: 14px;
+            min-width: auto;
+        }
+
+        .add-btn {
+            background-color: #4CAF50;
+        }
+
+        .add-btn:hover {
+            background-color: #45a049;
+        }
+
+        .clear-btn {
+            background-color: #f44336;
+            margin-left: 5px;
+        }
+
+        .clear-btn:hover {
+            background-color: #da190b;
+        }
+
+        .coordinate-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .coordinate-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .coordinate-item:last-child {
+            border-bottom: none;
+        }
+
+        .coordinate-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .coordinate-info {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .coordinate-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .coordinate-details {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .coordinate-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .use-btn {
+            background-color: #2196F3;
+            padding: 4px 8px;
+            font-size: 12px;
+            min-width: auto;
+        }
+
+        .use-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .delete-btn {
+            background-color: #ff9800;
+            padding: 4px 8px;
+            font-size: 12px;
+            min-width: auto;
+        }
+
+        .delete-btn:hover {
+            background-color: #f57c00;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 
@@ -145,13 +309,58 @@
             </div>
 
             <div class="form-group">
-                <label for="overlayImage">选择中心叠加图片：</label>
-                <input type="file" id="overlayImage" accept="image/*">
+                <label for="overlayImageSelect">选择中心叠加图片：</label>
+                <select id="overlayImageSelect">
+                    <option value="">请选择叠加图片</option>
+                    <option value="images/watermark.png">现场拍照</option>
+                    <!-- <option value="images/logo2.png">标志2 (logo2.png)</option>
+                    <option value="images/logo3.png">标志3 (logo3.png)</option>
+                    <option value="images/watermark.png">水印图 (watermark.png)</option>
+                    <option value="images/overlay.png">叠加图 (overlay.png)</option>
+                    <option value="images/badge.png">徽章图 (badge.png)</option>
+                    <option value="images/seal.png">印章图 (seal.png)</option> -->
+                </select>
+                <img id="overlayPreview" class="overlay-preview hidden" alt="叠加图片预览">
+                <div id="imageError" class="hidden" style="color: red; margin-top: 5px; font-size: 14px;">
+                    图片加载失败，请检查文件是否存在</div>
             </div>
         </div>
 
         <div class="section">
             <h2>水印设置</h2>
+
+            <div class="coordinate-manager">
+                <h3 style="margin-top: 0; color: #333;">定位获取坐标</h3>
+
+                <div class="coordinate-form">
+                    <div>
+                        <label for="newLocationName" style="font-size: 12px; margin-bottom: 3px;">位置名称</label>
+                        <input type="text" id="newLocationName" placeholder="例如：当前位置">
+                    </div>
+                    <div>
+                        <button id="getCurrentLocation" type="button" class="add-btn">获取当前位置</button>
+                        <button id="addCoordinate" type="button" class="add-btn" disabled>保存位置</button>
+                    </div>
+                    <div>
+                        <button id="clearAll" type="button" class="clear-btn">清空记录</button>
+                    </div>
+                </div>
+
+                <div id="locationStatus" class="coordinate-display hidden">
+                    <div id="statusMessage">正在获取位置信息...</div>
+                    <div id="currentCoordinate" class="hidden">
+                        <strong>当前位置：</strong><br>
+                        <span id="displayLongitude">经度: -</span><br>
+                        <span id="displayLatitude">纬度: -</span><br>
+                        <span id="displayAccuracy">精度: -</span>
+                    </div>
+                </div>
+
+                <div class="coordinate-list" id="coordinateList">
+                    <div class="empty-message">暂无坐标记录，请获取当前位置并保存</div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="longitudeTitle">经度标题：</label>
                 <input type="text" id="longitudeTitle" value="经度：" placeholder="例如：经度：">
@@ -179,7 +388,7 @@
 
             <div class="form-group">
                 <label for="coordinateValue">坐标值：</label>
-                <input type="text" id="coordinateValue" placeholder="例如：X:123 Y:456">
+                <input type="text" id="coordinateValue" value="WGS84坐标系" placeholder="例如：X:123 Y:456">
             </div>
 
             <div class="form-group">
@@ -236,7 +445,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const mainImageInput = document.getElementById('mainImage');
-            const overlayImageInput = document.getElementById('overlayImage');
+            const overlayImageSelect = document.getElementById('overlayImageSelect');
+            const overlayPreview = document.getElementById('overlayPreview');
+            const imageError = document.getElementById('imageError');
             const generateBtn = document.getElementById('generateBtn');
             const preview = document.getElementById('preview');
             const canvas = document.getElementById('canvas');
@@ -247,8 +458,236 @@
             const watermarkMarginInput = document.getElementById('watermarkMargin');
             const watermarkFontSizeInput = document.getElementById('watermarkFontSize');
 
+            // 坐标管理相关元素
+            const newLocationName = document.getElementById('newLocationName');
+            const getCurrentLocationBtn = document.getElementById('getCurrentLocation');
+            const addCoordinateBtn = document.getElementById('addCoordinate');
+            const clearAllBtn = document.getElementById('clearAll');
+            const coordinateList = document.getElementById('coordinateList');
+            const locationStatus = document.getElementById('locationStatus');
+            const statusMessage = document.getElementById('statusMessage');
+            const currentCoordinate = document.getElementById('currentCoordinate');
+            const displayLongitude = document.getElementById('displayLongitude');
+            const displayLatitude = document.getElementById('displayLatitude');
+            const displayAccuracy = document.getElementById('displayAccuracy');
+
             let mainImg = null;
             let overlayImg = null;
+            let coordinates = [];
+            let currentPosition = null;
+
+            // 从本地存储加载坐标
+            function loadCoordinates() {
+                const saved = localStorage.getItem('savedCoordinates');
+                if (saved) {
+                    try {
+                        coordinates = JSON.parse(saved);
+                        renderCoordinateList();
+                    } catch (e) {
+                        console.error('加载坐标数据失败:', e);
+                        coordinates = [];
+                    }
+                }
+            }
+
+            // 保存坐标到本地存储
+            function saveCoordinates() {
+                try {
+                    localStorage.setItem('savedCoordinates', JSON.stringify(coordinates));
+                } catch (e) {
+                    console.error('保存坐标数据失败:', e);
+                }
+            }
+
+            // 渲染坐标列表
+            function renderCoordinateList() {
+                if (coordinates.length === 0) {
+                    coordinateList.innerHTML = '<div class="empty-message">暂无坐标记录，请获取当前位置并保存</div>';
+                    return;
+                }
+
+                const listHTML = coordinates.map((coord, index) => `
+                    <div class="coordinate-item">
+                        <div class="coordinate-info">
+                            <div class="coordinate-name">${coord.name}</div>
+                            <div class="coordinate-details">
+                                经度: ${coord.longitude} | 纬度: ${coord.latitude}<br>
+                                精度: ±${coord.accuracy}米 | 保存时间: ${coord.dateStr}
+                            </div>
+                        </div>
+                        <div class="coordinate-actions">
+                            <button class="use-btn" onclick="useCoordinate(${index})">使用</button>
+                            <button class="delete-btn" onclick="deleteCoordinate(${index})">删除</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                coordinateList.innerHTML = listHTML;
+            }
+
+            // 显示位置状态
+            function showLocationStatus(message, type) {
+                locationStatus.classList.remove('hidden');
+                currentCoordinate.classList.add('hidden');
+                statusMessage.textContent = message;
+                statusMessage.className = `status-${type}`;
+            }
+
+            // 使用坐标（全局函数）
+            window.useCoordinate = function (index) {
+                const coord = coordinates[index];
+                if (coord) {
+                    document.getElementById('longitudeValue').value = coord.longitude;
+                    document.getElementById('latitudeValue').value = coord.latitude;
+                    alert(`已填充坐标：${coord.name}`);
+                }
+            };
+
+            // 删除坐标（全局函数）
+            window.deleteCoordinate = function (index) {
+                if (confirm('确定要删除这个坐标记录吗？')) {
+                    coordinates.splice(index, 1);
+                    saveCoordinates();
+                    renderCoordinateList();
+                }
+            };
+
+            // 获取当前位置
+            getCurrentLocationBtn.addEventListener('click', function () {
+                if (!navigator.geolocation) {
+                    showLocationStatus('您的浏览器不支持地理定位功能', 'error');
+                    return;
+                }
+
+                // 显示获取状态
+                locationStatus.classList.remove('hidden');
+                currentCoordinate.classList.add('hidden');
+                statusMessage.textContent = '正在获取位置信息...';
+                statusMessage.className = 'status-warning';
+                getCurrentLocationBtn.disabled = true;
+                getCurrentLocationBtn.textContent = '获取中...';
+
+                const options = {
+                    enableHighAccuracy: true, // 启用高精度
+                    timeout: 15000,          // 15秒超时
+                    maximumAge: 0            // 不使用缓存
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    // 成功回调
+                    function (position) {
+                        currentPosition = {
+                            longitude: position.coords.longitude.toFixed(6),
+                            latitude: position.coords.latitude.toFixed(6),
+                            accuracy: Math.round(position.coords.accuracy)
+                        };
+
+                        // 显示位置信息
+                        displayLongitude.textContent = `经度: ${currentPosition.longitude}`;
+                        displayLatitude.textContent = `纬度: ${currentPosition.latitude}`;
+                        displayAccuracy.textContent = `精度: ±${currentPosition.accuracy}米`;
+
+                        currentCoordinate.classList.remove('hidden');
+                        statusMessage.textContent = '位置获取成功！';
+                        statusMessage.className = 'status-success';
+
+                        // 启用保存按钮
+                        addCoordinateBtn.disabled = false;
+
+                        // 自动填充到表单
+                        document.getElementById('longitudeValue').value = currentPosition.longitude;
+                        document.getElementById('latitudeValue').value = currentPosition.latitude;
+
+                        // 恢复按钮状态
+                        getCurrentLocationBtn.disabled = false;
+                        getCurrentLocationBtn.textContent = '获取当前位置';
+
+                        // 设置默认位置名称
+                        if (!newLocationName.value.trim()) {
+                            const now = new Date();
+                            const timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                            newLocationName.value = `位置_${timeStr}`;
+                        }
+                    },
+                    // 错误回调
+                    function (error) {
+                        let errorMessage = '';
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = '定位权限被拒绝，请在浏览器设置中允许定位权限';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = '位置信息不可用，请检查设备GPS或网络连接';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = '定位请求超时，请重试';
+                                break;
+                            default:
+                                errorMessage = '获取位置时发生未知错误';
+                                break;
+                        }
+
+                        showLocationStatus(errorMessage, 'error');
+                        getCurrentLocationBtn.disabled = false;
+                        getCurrentLocationBtn.textContent = '获取当前位置';
+                    },
+                    options
+                );
+            });
+
+            // 保存当前位置
+            addCoordinateBtn.addEventListener('click', function () {
+                const name = newLocationName.value.trim();
+
+                if (!name) {
+                    alert('请输入位置名称');
+                    return;
+                }
+
+                if (!currentPosition) {
+                    alert('请先获取当前位置');
+                    return;
+                }
+
+                // 检查是否已存在相同名称
+                if (coordinates.some(coord => coord.name === name)) {
+                    if (!confirm('已存在相同名称的坐标记录，是否继续添加？')) {
+                        return;
+                    }
+                }
+
+                // 添加新坐标
+                const newCoord = {
+                    name: name,
+                    longitude: currentPosition.longitude,
+                    latitude: currentPosition.latitude,
+                    accuracy: currentPosition.accuracy,
+                    timestamp: new Date().getTime(),
+                    dateStr: new Date().toLocaleString()
+                };
+
+                coordinates.push(newCoord);
+                saveCoordinates();
+                renderCoordinateList();
+
+                // 清空输入框和状态
+                newLocationName.value = '';
+                currentPosition = null;
+                addCoordinateBtn.disabled = true;
+                locationStatus.classList.add('hidden');
+
+                alert('位置保存成功！');
+            });
+
+            // 清空所有坐标
+            clearAllBtn.addEventListener('click', function () {
+                if (confirm('确定要清空所有坐标记录吗？此操作不可恢复！')) {
+                    coordinates = [];
+                    saveCoordinates();
+                    renderCoordinateList();
+                    alert('所有坐标记录已清空');
+                }
+            });
 
             // 填充当前时间
             currentTimeBtn.addEventListener('click', function () {
@@ -280,33 +719,45 @@
                 }
             });
 
-            // 加载叠加图片
-            overlayImageInput.addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                        overlayImg = new Image();
-                        overlayImg.onload = function () {
-                            checkImagesLoaded();
-                        };
-                        overlayImg.src = event.target.result;
+            // 选择叠加图片
+            overlayImageSelect.addEventListener('change', function (e) {
+                const selectedImagePath = e.target.value;
+                if (selectedImagePath) {
+                    // 隐藏错误信息
+                    imageError.classList.add('hidden');
+
+                    overlayImg = new Image();
+                    overlayImg.onload = function () {
+                        // 图片加载成功
+                        overlayPreview.src = selectedImagePath;
+                        overlayPreview.classList.remove('hidden');
+                        checkImagesLoaded();
                     };
-                    reader.readAsDataURL(file);
+                    overlayImg.onerror = function () {
+                        // 图片加载失败
+                        overlayImg = null;
+                        overlayPreview.classList.add('hidden');
+                        imageError.classList.remove('hidden');
+                        checkImagesLoaded();
+                    };
+                    overlayImg.src = selectedImagePath;
+                } else {
+                    overlayImg = null;
+                    overlayPreview.classList.add('hidden');
+                    imageError.classList.add('hidden');
+                    checkImagesLoaded();
                 }
             });
 
             // 检查图片是否都已加载
             function checkImagesLoaded() {
-                if (mainImg && overlayImg) {
-                    generateBtn.disabled = false;
-                }
+                generateBtn.disabled = !(mainImg && overlayImg);
             }
 
             // 生成预览
             generateBtn.addEventListener('click', function () {
                 if (!mainImg || !overlayImg) {
-                    alert('请先上传背景图片和叠加图片');
+                    alert('请先上传背景图片和选择叠加图片');
                     return;
                 }
 
@@ -353,31 +804,67 @@
                 ctx.textBaseline = 'top';
 
                 // 计算行高
-                const lineHeight = Math.floor(fontSize * 1.6);
+                const textLineHeight = Math.floor(fontSize * 1.6);
 
                 // 绘制水印文本（文字轮廓效果）
                 function drawTextWithShadow(text, x, y) {
-                    // ctx.shadowColor = 'black';
-                    // ctx.shadowBlur = 4;
-                    // ctx.shadowOffsetX = 2;
-                    // ctx.shadowOffsetY = 2;
                     ctx.fillText(text, x, y);
-                    // ctx.shadowColor = 'transparent';
                 }
 
+                // 自动换行函数
+                function wrapText(text, maxWidth) {
+                    const words = text.split('');
+                    const lines = [];
+                    let currentLine = '';
+
+                    for (let i = 0; i < words.length; i++) {
+                        const testLine = currentLine + words[i];
+                        const metrics = ctx.measureText(testLine);
+
+                        if (metrics.width > maxWidth && currentLine !== '') {
+                            lines.push(currentLine);
+                            currentLine = words[i];
+                        } else {
+                            currentLine = testLine;
+                        }
+                    }
+                    lines.push(currentLine);
+                    return lines;
+                }
+
+                // 计算最大文本宽度（画布宽度的3/4）
+                const maxTextWidth = canvas.width * 0.75;
+
+                // 处理地址换行
+                const addressLines = wrapText(`${addressTitle}${addressValue}`, maxTextWidth);
+                const totalLines = 4 + addressLines.length; // 经度、纬度、坐标、时间 + 地址行数
+
                 // 计算水印文本的总高度
-                const totalTextHeight = lineHeight * 5;
+                const totalTextHeight = textLineHeight * totalLines;
 
                 // 计算起始位置，确保下边距与左边距相同
                 const startY = canvas.height - totalTextHeight - margin + 40;
                 const startX = margin;
 
+                let currentY = startY;
+
                 // 绘制水印文本
-                drawTextWithShadow(`${longitudeTitle}${longitudeValue}`, startX, startY);
-                drawTextWithShadow(`${latitudeTitle}${latitudeValue}`, startX, startY + lineHeight);
-                drawTextWithShadow(`${coordinateTitle}${coordinateValue}`, startX, startY + lineHeight * 2);
-                drawTextWithShadow(`${addressTitle}${addressValue}`, startX, startY + lineHeight * 3);
-                drawTextWithShadow(`${timeTitle}${timeValue}`, startX, startY + lineHeight * 4);
+                drawTextWithShadow(`${longitudeTitle}${longitudeValue}`, startX, currentY);
+                currentY += textLineHeight;
+
+                drawTextWithShadow(`${latitudeTitle}${latitudeValue}`, startX, currentY);
+                currentY += textLineHeight;
+
+                drawTextWithShadow(`${coordinateTitle}${coordinateValue}`, startX, currentY);
+                currentY += textLineHeight;
+
+                // 绘制地址（可能多行）
+                for (let i = 0; i < addressLines.length; i++) {
+                    drawTextWithShadow(addressLines[i], startX, currentY);
+                    currentY += textLineHeight;
+                }
+
+                drawTextWithShadow(`${timeTitle}${timeValue}`, startX, currentY);
 
                 // 显示预览
                 preview.src = canvas.toDataURL('image/jpeg');
@@ -392,6 +879,12 @@
                 link.href = canvas.toDataURL('image/jpeg');
                 link.click();
             });
+
+            // 初始加载坐标数据
+            loadCoordinates();
+
+            // 初始状态下禁用生成按钮
+            generateBtn.disabled = true;
         });
     </script>
 </body>
