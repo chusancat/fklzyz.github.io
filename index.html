@@ -294,7 +294,27 @@
         .hidden {
             display: none;
         }
-    </style>
+    
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    h1, h2, h3 {
+        font-size: 1.2em;
+    }
+    button, input, select, textarea {
+        font-size: 14px;
+        padding: 8px;
+    }
+    .coordinate-form {
+        grid-template-columns: 1fr;
+    }
+    .coordinate-actions {
+        flex-direction: column;
+    }
+}
+
+</style>
 </head>
 
 <body>
@@ -614,7 +634,11 @@
                         let errorMessage = '';
                         switch (error.code) {
                             case error.PERMISSION_DENIED:
-                                errorMessage = '定位权限被拒绝，请在浏览器设置中允许定位权限';
+                                if (location.protocol !== 'https:') {
+                                    errorMessage = '定位需要HTTPS，请切换到https://协议访问此页面';
+                                } else {
+                                    errorMessage = '定位权限被拒绝，请在浏览器或APP设置中允许定位权限，并刷新页面重试';
+                                }
                                 break;
                             case error.POSITION_UNAVAILABLE:
                                 errorMessage = '位置信息不可用，请检查设备GPS或网络连接';
@@ -627,7 +651,7 @@
                                 break;
                         }
 
-                        showLocationStatus(errorMessage, 'error');
+                        showLocationStatus(errorMessage + ' 点击获取当前位置按钮可重试。', 'error');
                         getCurrentLocationBtn.disabled = false;
                         getCurrentLocationBtn.textContent = '获取当前位置';
                     },
